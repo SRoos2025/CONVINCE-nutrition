@@ -1,0 +1,83 @@
+---
+title: "5.1-Convince-censoring_information"
+author: "Sanne Roos"
+format: docx
+execute:
+    echo: false
+editor: source
+---
+
+```{r set-up}
+
+#0. set-up ----
+#load packages
+pacman::p_load ("rio",     #to recognize other files and load them in R
+                "conflicted", #if a function is in more packages it makes you choose which one to use
+                "tidyverse", #tidy data
+                "ggplot2",#make plots
+                "knitr"
+)
+
+#resolve package conflicts
+conflicts_prefer(dplyr::filter) #between dplyr and stats
+conflicts_prefer(dplyr::lag) #between dplyr and stats
+
+#set working directory
+path <- "/Users/sroos6/Library/CloudStorage/OneDrive-UMCUtrecht/Documenten/Projecten/10-2025 HDF pooling trials/"
+#load data
+load(paste0(path, "imputed_data_convince.Rdata"))
+
+#rename 
+data_all <- dat_imputed
+
+#unimputed in seperate dataset
+dat_unimputed <- data_all %>%
+    filter(.imp == 0)
+
+#1.0 describe censoring visits for supplemental Table 1----
+table_censor <- dat_unimputed %>%
+    group_by(id) %>%
+    #filter the last row number of each patient
+    filter(row_number() == n()) %>% #if the row number is the total amount of row numbers, this is the last row number
+               ungroup() %>%
+               mutate(
+                   cens_reason = case_when(
+                       end_eos_reason_recode_full == "Patient died" ~ end_eos_reason_recode_full,
+                       .default = end_eot_reason_recode_full
+               )
+               )
+#summarise events per visit and group by censor reason
+reason_counts <- table_censor %>%
+    group_by(visit, cens_reason) %>%
+    summarise(n_reason = n()) %>%
+    ungroup()
+
+#get the total events per visit
+visit_totals <- reason_counts %>%
+    group_by(visit) %>%
+    summarise(n_total = sum(n_reason)) %>%
+    ungroup()
+
+#left joint these to one table
+final_table <- reason_counts %>%
+    left_join(visit_totals, by = "visit") %>%
+    #begin with highest amount of "outflow" so sort descending
+    arrange(visit, desc(n_reason)) %>%
+    #duplicated returns true or false for rows who have the same value twice
+    #so if there are rows visit 0 visit 0 visit 0, now in will only show visit 0 as text in the first
+    mutate(
+        visit_label = if_else(duplicated(visit), "", paste0("Visit ", visit)),
+        total_label = if_else(duplicated(visit), "", as.character(n_total))
+    ) %>%
+    select(
+        Visit = visit_label,
+        `Total per visit` = total_label,
+        Reason = cens_reason,
+        n = (n_reason)
+    )
+    
+
+knitr::kable(final_table)
+```
+
+"knitr"
