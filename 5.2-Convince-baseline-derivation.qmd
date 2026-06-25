@@ -1,0 +1,113 @@
+#2.0------
+title: "5.2-Convince-baselinetable-derivation"
+author: "Sanne Roos"
+format: docx
+execute:
+    echo: false
+editor: source
+---
+
+#0. Set-up 
+```{r set-up} 
+#load packages 
+pacman::p_load("conflicted", # Package conflicts 
+               "here", # Relative directories 
+               "tidyverse", # Data wrangling 
+               "tableone", # Baseline characteristics table 
+               "magrittr", #operator pipes %>%
+               "knitr"#generate dynamic reports
+               )#
+               #solve conflicts 
+               conflicts_prefer(dplyr::filter) # Between dplyr & stats 
+               conflicts_prefer(magrittr::extract) # Between tidyr & magrittr 
+
+#set working directory 
+path <- "/Users/sroos6/Library/CloudStorage/OneDrive-UMCUtrecht/Documenten/Projecten/10-2025 HDF pooling trials/"
+
+setwd("/Users/sroos6/Library/CloudStorage/OneDrive-UMCUtrecht/Documenten/Projecten/10-2025 HDF pooling trials/")
+
+#load data 
+load(paste0(path, "imputed_data_convince.Rdata"))
+```
+
+#1. Descriptive tables
+#1.1 Table one
+```{r table one}
+#get unimputed data
+dat_unimp <- filter(dat_imputed, .imp == 0)
+
+#filter visit == 0 for baseline information
+dat_unimp_baseline <- dat_unimp %>%
+    filter(visit == 0)
+
+#specify which variables in the dataset to include in the baseline table
+vec_var <- c(
+    #general information
+    "sex", "age",
+    #vitals
+    "sbp_pre", "dbp_pre",
+    #dialysis information
+    "dial_vintage", "ktv_pre", "blood_flow", "uf_vol", "weight_post",
+    #laboratory
+    "creat_pre_umoll", "bun", "crp_pre_mgdl", "hb_pre_mmoll", "urea_pre_mgdl", 
+    #variables of interest in analaysis nutrition
+    "npcr", "lti", "sci", "bmi", "ultra_fil_rate",
+    "SCR_MH_COPD_OCCUR", "SCR_MH_DIAB_OCCUR", "SCR_MH_CHF_OCCUR")
+
+#specify which vaiables are continuous
+vec_cnt <- c("age", "sbp_pre", "dbp_pre", "bmi", "sci", "lti", "npcr", "hb_pre_mmoll", "crp_pre_mgdl", "bun", "creat_pre_umoll", "dial_vintage", "ktv_pre", "blood_flow", "uf_vol", "urea_pre_mgdl", "weight_post", "ultra_fil_rate")
+
+#specify that all variables not continuous are categorical
+vec_cat <- vec_var[!vec_var %in% vec_cnt]
+
+#make baseline table
+tab_one <- CreateTableOne(vars = vec_var,
+                          data = dat_unimp_baseline,
+                          factorVars = vec_cat,
+                          addOverall = TRUE,
+                          smd = TRUE,
+                          strata = "group") %>%
+    #print to matrix
+    print(printToggle = FALSE,
+          contDigits = 1,
+          nonnormal = c("age", "dial_vintage", "blood_flow", "uf_vol", "bun", "crp_pre_mgdl",  "lti", "creat_pre_umoll", "ultra_fil_rate"),
+          smd= TRUE) %>%
+    #To matrix
+    as.matrix() %>%
+    #keep only columns of interest
+    magrittr::extract(, c(1,2,3, 6)) %>%
+    # Add labels
+    set_colnames(c("Overall",  "High-Flux hemodialysis", "High-Dose hemodiafiltration", "SMD"))%>%
+        #add labels
+        set_rownames(c(
+                   "Number of individuals",
+                   "Female, n (%)",
+                   "Age, years, median [IQR]",
+                   "Systolic blood pressure before dialysis, mmHg, mean (SD)",
+                   "Diastolic blood pressure before dialysis, mmHg, mean (SD)",
+                   "Dialysis vintage, years, median [IQR]",
+                   "Single-pool Kt/V, mean (SD)", 
+                   "Blood flow, ml/min, median [IQR]",
+                   "Ultrafiltration volume, median [IQR]",
+                   "Post-dialysis weight (kg)",
+                   "Serum creatinin before dialysis, micromol/liter, median [IQR]",
+                   "Blood urea nitrogen, mg/dl, median [IQR]",
+                   "C-reactive protein, mg/dl, median [IQR]",
+                   "Hb, mmol/L, mean (SD)",
+                   "Serum urea before dialysis, micromol/liter, mean (SD)",
+                   "nPCR, mean (SD)",
+                   "Lean tissue index, estimated, mean (SD)",
+                   "Simplified creatinin index, mean (SD)",
+                   "BMI, kg/m2, mean (SD)",
+                   "Ultrafiltration rate (mL/kg/hour), median [IQR]",
+                   "COPD",
+                   "Diabetes Mellitus",
+                   "Heart failure"
+                  ))
+
+# Kable table
+kable(tab_one)
+
+```
+
+
