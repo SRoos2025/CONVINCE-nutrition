@@ -297,7 +297,7 @@ plots_spline_cox[[2]]
 
 ####4.3 LTI----
 #for estimated LTI, it is less clear what an "ideal" reference value should be
-#therefore, we use the mean value of another publication: Canaud et al. Clinical and predictive value of simplified creatinine index used as muscle mass surrogate in end-stage kidney disease haemodialysis patients-results from the international MONitoring Dialysis Outcome initiative. Nephrol Dial Transplant. 2020 Dec 4;35(12):2161-2171. doi: 10.1093/ndt/gfaa098. 
+#therefore, we use median of total group which is 17.2 
 fit_spline_lti_cox <- map(imp_list_unweight, \(x)cox_spline_nutr(x, nutr_var = "lti", 
                                                         lower_bound = min(data_unweighted[["lti"]]), upper_bound = max(data_unweighted[["lti"]])))
 
