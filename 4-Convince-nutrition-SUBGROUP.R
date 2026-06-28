@@ -61,6 +61,7 @@ load(paste0(path, "imputed_data_convince.Rdata"))
 unimputed <- dat_imputed %>%
     filter(.imp ==0)
 
+#define baseline sci and lti
 unimputed <- unimputed %>%
     group_by(id)%>%
     mutate(
