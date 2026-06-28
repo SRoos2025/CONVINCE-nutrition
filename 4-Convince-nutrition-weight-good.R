@@ -904,6 +904,7 @@ plots_spline_cox[[2]]
 
 #6.3 LTI ----
 #weighted per visit AND imputation
+#reference value is median of total group
 fit_spline_lti_cox_weight <- map(imp_list_weight_imp, \(x)cox_spline_nutr(x, nutr_var = "lti", 
                                                                       lower_bound = min(data_weight_allvisits_imp[["lti"]]),
                                                                       upper_bound = max(data_weight_allvisits_imp[["lti"]]), weights = TRUE)
