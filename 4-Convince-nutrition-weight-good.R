@@ -711,132 +711,10 @@ plot_data_wemix <- plot_data_wemix %>%
         ll = if_else(ll<0, 0, ll)
     )
 
-crp_plot <- plot_lmm_nutrition_weight(plot_data_wemix, y_lab = "CRP (mg/dL)", y_lim = c(0, 10))
+crp_plot <- plot_lmm_nutrition_weight(plot_data_wemix, y_lab = "CRP (mg/dL)", y_lim = c(0, 5))
 crp_plot
 
 ggsave("crp_plot_weight.png", crp_plot,
-       width = 16, height = 10, dpi = 600)
-
-#7.0 Kt/V
-fits_ktv_wemix <- map(imp_list_weight_imp, fit_wemix, outcome = "ktv_pre")
-
-result_ktv_wemix <- tidy_we_mix_results(fits_ktv_wemix)
-
-pool_ktv_wemix <- rubins_rules_lmm(result_ktv_wemix , m = 10)
-
-selected_terms <- paste0("visit_time", seq(3, 45, by = 3))
-                                   
-                        table_ktv_wemix <- pool_ktv_wemix %>%
-                                       filter(term %in% selected_terms) %>%
-                                       select(term, theta, ll, ul) %>%
-                                       arrange(as.numeric(str_extract(term, "\\d+"))) %>%
-                                       mutate(
-                                           across(
-                                               c(theta, ll, ul),
-                                               ~ round(.x, 3)
-                                           )
-                                       )                            
-
-plot_data_wemix <- expand.grid(
-    visit_time =(c(0,3,6,9,12,15,18,21,24,27,30,33,36,39,42,45)),
-    group = c(0,1))
-
-names_matrix <- c(
-    "(Intercept)", "Residual", "baseline_ktv_pre", "group1", "id.(Intercept)",
-    "visit_time12", "visit_time12:group1",
-    "visit_time15", "visit_time15:group1",
-    "visit_time18", "visit_time18:group1",
-    "visit_time21", "visit_time21:group1",
-    "visit_time24", "visit_time24:group1",
-    "visit_time27", "visit_time27:group1",
-    "visit_time3",
-    "visit_time30", "visit_time30:group1",
-    "visit_time33", "visit_time33:group1",
-    "visit_time36", "visit_time36:group1",
-    "visit_time39", "visit_time39:group1",
-    "visit_time3:group1",
-    "visit_time42", "visit_time42:group1",
-    "visit_time45", "visit_time45:group1",
-    "visit_time6", "visit_time6:group1",
-    "visit_time9", "visit_time9:group1"
-)
-#first we set the matrix to 0, we want the number of rows to correspond to plot_data_wemix
-matr <- matrix(0, nrow = nrow(plot_data_wemix), ncol = length(names_matrix))
-#set names of columns. in matrix to the names of the terms of pool_we_mix
-colnames(matr) <- names_matrix
-
-#to be able to check if everything goes well, we give rownames to visit time and group
-rownames(matr) <- paste0(
-    plot_data_wemix$visit_time,
-    plot_data_wemix$group,
-    sep = "_"
-)
-
-#define mean baseline values of each group
-mean_baseline_hd  <- data_weight_allvisits_imp %>%
-    filter(group == 0) %>%
-    summarise(m = mean(baseline_ktv_pre)) %>%
-    pull(m)
-
-mean_baseline_hdf <- data_weight_allvisits_imp %>%
-    filter(group == 1) %>%
-    summarise(m = mean(baseline_ktv_pre)) %>%
-    pull(m)
-
-#residual and id.intercept are variance terms, not coefficients, they are not relevant for prediction so we set them to 0
-#the intercept applies for everyone so that should be set to 1
-#furthermore, we set the baseline npcr value to the corresponding mean value of the group
-matr[, "(Intercept)"]    <- 1
-matr[, "group1"]         <- plot_data_wemix$group
-matr[, "id.(Intercept)"] <- 0
-
-matr[, "baseline_ktv_pre"] <- if_else(plot_data_wemix$group == 0, mean_baseline_hd, mean_baseline_hdf)
-
-#loop over visit times and interaction terms (with :group1)
-for (visit_time in unique(plot_data_wemix$visit_time)) {
-    
-    vt_name <- paste0("visit_time", visit_time)
-    vt_int  <- paste0(vt_name, ":group1")
-    
-    #check for the visit time if it corresponds to the visit time in plot data wemix
-    rows <- plot_data_wemix$visit_time == visit_time
-    
-    #if it corresponds tot the matrix column, set to 1
-    if (vt_name %in% colnames(matr)) {
-        matr[rows, vt_name] <- 1
-    }
-    
-    #if it matches to the colname of the interaction, and group is 1 then set to 1.
-    if (vt_int %in% colnames(matr)) {
-        matr[rows & plot_data_wemix$group == 1, vt_int] <- 1
-    }
-}
-
-#next, we make vectors from theta, lower and upper limit from pool we mix
-theta <- pool_ktv_wemix$theta
-ll <- pool_ktv_wemix$ll
-ul <- pool_ktv_wemix$ul
-#we match these numbers with the corresponding names of the coefficeints
-names(theta) <- pool_ktv_wemix$term
-names(ll) <- pool_ktv_wemix$term
-names(ul) <- pool_ktv_wemix$term
-#just to be sure, we make sure theta ll and ul are in exact same order as the matrix for the multiplication
-theta <- theta[colnames(matr)]
-ll <- ll[colnames(matr)]
-ul <- ul[colnames(matr)]
-#matrix multiplication
-pred <- matr %*% theta
-ll <- matr %*% ll
-ul <- matr %*% ul
-#assign predictions as a seperate column in plot_data_wemix
-plot_data_wemix$pred <- as.numeric(pred)
-plot_data_wemix$ll <- as.numeric(ll)
-plot_data_wemix$ul <- as.numeric(ul)
-
-ktv_plot <- plot_lmm_nutrition_weight(plot_data_wemix, y_lab = "Kt/V", y_lim = c(1, 2.5))
-ktv_plot
-
-ggsave("ktv_weight.png", ktv_plot,
        width = 16, height = 10, dpi = 600)
 
 
@@ -895,10 +773,10 @@ fit_spline_bmi_cox_weight <- map(imp_list_weight_imp, \(x)cox_spline_nutr(x, nut
 #turn it from list to dataframe
 fit_spline_bmi_cox <- bind_rows(fit_spline_bmi_cox_weight)
 #apply rubin's rules
-fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 25)
+fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 23.9)
 expr_bmi <- expression(BMI (kg/m^2))
 #plot it
-plots_spline_cox[[2]]<- nutr_flex_plot(fit_spline_bmi_cox, nutr_var = "bmi", x_lab = expr_bmi, center_val = 25, break_min = 10, break_max = 50, breaks = 10)
+plots_spline_cox[[2]]<- nutr_flex_plot(fit_spline_bmi_cox, nutr_var = "bmi", x_lab = expr_bmi, center_val = 23.9, break_min = 10, break_max = 50, breaks = 10)
 
 plots_spline_cox[[2]]
 
@@ -915,9 +793,9 @@ fit_spline_lti_cox <- bind_rows(fit_spline_lti_cox_weight)
 fit_spline_lti_cox <- rubin_rule_cox_spline(fit_spline_lti_cox, nutr_var = "lti", center_at = 17.2)
 expr_lti <- expression (LTI (mg/m^2))
 #plot it
-plots_spline_cox[[3]]<- nutr_flex_plot(fit_spline_lti_cox, nutr_var = "lti", x_lab = expr_lti, center_val = 17.2, break_min = 10, break_max = 40, breaks = 10)
+plots_spline_cox[[4]]<- nutr_flex_plot(fit_spline_lti_cox, nutr_var = "lti", x_lab = expr_lti, center_val = 17.2, break_min = 10, break_max = 40, breaks = 10)
 
-plots_spline_cox[[3]]
+plots_spline_cox[[4]]
 
 
 #6.3 SCI ----
@@ -931,9 +809,9 @@ fit_spline_sci_cox <- bind_rows(fit_spline_sci_cox_weight)
 #apply rubin's rules
 fit_spline_sci_cox <- rubin_rule_cox_spline(fit_spline_sci_cox, nutr_var = "sci", center_at = 19.3)
 #plot it
-plots_spline_cox[[4]]<- nutr_flex_plot(fit_spline_sci_cox, nutr_var = "sci", x_lab = "SCI (mg/kg/day)", center_val = 19.3, break_min = 15, break_max = 30, breaks = 5)
+plots_spline_cox[[3]]<- nutr_flex_plot(fit_spline_sci_cox, nutr_var = "sci", x_lab = "SCI (mg/kg/day)", center_val = 19.3, break_min = 15, break_max = 30, breaks = 5)
 
-plots_spline_cox[[4]]
+plots_spline_cox[[3]]
 
 
 figure_1_cox <- wrap_plots(plots_spline_cox, nrow= 2)+ plot_layout(guides = "collect") + plot_annotation(tag_levels = "A")
