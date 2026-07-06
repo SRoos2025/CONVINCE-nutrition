@@ -13,12 +13,12 @@ setwd ("/Users/sroos6/Documents/Projecten/HDF pooling trials/data/Archief 2")
 data_co <-readRDS("/Users/sroos6/Library/CloudStorage/OneDrive-UMCUtrecht/Documenten/Projecten/10-2025 HDF pooling trials/data/CONVINCE-RScripts-and-Datasets_01Sep2024/2Data/3Cleaned-and-Formatted-Datasets/1Main-Dataset/MainDataset_FINAL_20230417.rds") %>% #read.csv2("CONVINCE_export_20230417.csv") %>%
     #make al variable lower case
     set_colnames(tolower(colnames(.)))%>%
-    #we want to remove scr or v00 before the visit
+    #we want to remove scr or v00 before the visit variable
     #To do that, we use string replace. Note: this replaces the first match, string replace_all replaces all matches.
     #In string replace, first state where the string can be found, in this case in colnames(.)
     #Second, define the pattern and then by what to replace.
     #Here we we use reggex. ^ means begin of the string, $ means end of the string.
-    #we want the scr to be replaced by v00 because it is baseline, or "screen"
+    #we want the scr to be replaced by v00 because it scr stands for baseline, or "screen"
     # with ?<= we look back. So from _ we look back
     #we look back at the beginning so ^, then a v and then there are exactly 2 digits. THIS IS NOT REPLACED. It serves only to recognize
     #that is \d->https://regex101.com/ because in R \ is an expression we escape that by again applying \. We want to replace the _ by . 
@@ -59,7 +59,7 @@ sum(is.na(data_long$urea_pre_mmoll)) #12095
 sum(is.na(data_long$urea_pre_gl)) #21198
 sum(is.na(data_long$urea_pre_mgdl))#12095
 
-#weight
+#weight and height
 sum(is.na(data_long$height)) #23124
 sum(is.na(data_long$weight_post)) #11920
 
