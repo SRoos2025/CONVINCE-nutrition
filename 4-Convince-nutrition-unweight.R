@@ -194,7 +194,7 @@ m <- length(fits_crp_unweight)
 
 pooled_pred_crp_unweight <-pooled_pred(preds_crp_unweight) 
 
-plot_crp <- plot_lmm_nutrition(pooled_pred_crp_unweight, y_lab = "CRP(mg/dL)", y_lim = c(0, 10))
+plot_crp <- plot_lmm_nutrition(pooled_pred_crp_unweight, y_lab = "CRP(mg/dL)", y_lim = c(0, 5))
 plot_crp
 
 ggsave("crp_unweighted.png", plot_crp,
@@ -251,7 +251,7 @@ result_cox_weight <- extract_cox_weight(fits_npcr_cox_weight)
 pooled_result_cox_weight <- rubins_rules_lmm(result_cox_weight, m = 10)
 
 
-#4.0 pspline models----
+#4.0 normalised spline models----
 #check for potential non-linear associations
 #we use resource: https://cran.r-project.org/web/packages/survival/vignettes/splines.pdf
 
@@ -287,7 +287,7 @@ fit_spline_bmi_cox <- map(imp_list_unweight, \(x)cox_spline_nutr(x, nutr_var = "
 #turn it from list to dataframe
 fit_spline_bmi_cox <- bind_rows(fit_spline_bmi_cox)
 #apply rubin's rules
-fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 25)
+fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 23.9)
 
 
 #plot it
@@ -312,7 +312,7 @@ plots_spline_cox[[3]]<- nutr_flex_plot(fit_spline_lti_cox, nutr_var = "lti", x_l
 plots_spline_cox[[3]]
 #####4.4 SCI----
 #for estimated SCI, it is less clear what an "ideal" reference value should be
-#therefore, we use the mean value of another publication: Canaud et al. Clinical and predictive value of simplified creatinine index used as muscle mass surrogate in end-stage kidney disease haemodialysis patients-results from the international MONitoring Dialysis Outcome initiative. Nephrol Dial Transplant. 2020 Dec 4;35(12):2161-2171. doi: 10.1093/ndt/gfaa098.
+#therefore, we use the median of the total study population
 fit_spline_sci_cox <- map(imp_list_unweight, \(x)cox_spline_nutr(x, nutr_var = "sci", 
                                                         lower_bound = min(data_unweighted[["sci"]]), upper_bound = max(data_unweighted[["sci"]])))
 
