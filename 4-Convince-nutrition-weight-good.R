@@ -70,13 +70,13 @@ data_wemix <- cbind(fits_npcr_wemix[[1]][["coef"]], fits_npcr_wemix[[1]][["SE"]]
     as.data.frame() %>%
     set_colnames(c("coef", "SE"))
 
-# #now for glm 
+# #now we compare with glm 
 # fits_glm <- map(imp_list_weight_imp, svy_glm, outcome = "npcr")
 # data_svyglm <- cbind(fits_glm[[1]]$model$coefficients, fits_glm[[1]][["SE"]]) %>%
 #     as.data.frame() %>%
 #     set_colnames(c("coef", "SE"))
 # 
-# #now for svylme
+# #now we compare with svylme
 # #problem is this gives error for time as a categorical variable
 # fits_lme <- map(imp_list_weight_imp, svy_lme, outcome = "npcr")
 # data_svylme <- cbind(fits_lme[[1]][["coef"]], fits_glm[[1]][["SE"]]) %>%
@@ -84,7 +84,7 @@ data_wemix <- cbind(fits_npcr_wemix[[1]][["coef"]], fits_npcr_wemix[[1]][["SE"]]
 #     set_colnames(c("coef", "SE"))
 
 #when comparing glm and svylme to Wemix, there are some small differences but the range/size of numbers is similar
-#if we continue with WeMix
+#we continue with wemix because it supports weighting and time as a categorical visit variable
 #tidy package does not work with wemix, so we have to create tidy output ourselves using the self written function tidy wemix results
 result_we_mix <- tidy_we_mix_results(fits_npcr_wemix)
 #pool
