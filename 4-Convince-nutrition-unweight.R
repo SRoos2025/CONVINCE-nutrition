@@ -297,7 +297,7 @@ plots_spline_cox[[2]]
 
 ####4.3 LTI----
 #for estimated LTI, it is less clear what an "ideal" reference value should be
-#therefore, we use median of total group which is 17.2 
+#therefore, we use median 
 fit_spline_lti_cox <- map(imp_list_unweight, \(x)cox_spline_nutr(x, nutr_var = "lti", 
                                                         lower_bound = min(data_unweighted[["lti"]]), upper_bound = max(data_unweighted[["lti"]])))
 
@@ -312,7 +312,7 @@ plots_spline_cox[[3]]<- nutr_flex_plot(fit_spline_lti_cox, nutr_var = "lti", x_l
 plots_spline_cox[[3]]
 #####4.4 SCI----
 #for estimated SCI, it is less clear what an "ideal" reference value should be
-#therefore, we use the median of the total study population
+#therefore, we use the median 
 fit_spline_sci_cox <- map(imp_list_unweight, \(x)cox_spline_nutr(x, nutr_var = "sci", 
                                                         lower_bound = min(data_unweighted[["sci"]]), upper_bound = max(data_unweighted[["sci"]])))
 
