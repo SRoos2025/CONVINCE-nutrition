@@ -259,14 +259,14 @@ data_long <- data_long %>%
     mutate(
         time = case_when(
             visit == 0 ~ 0,
-            fup_y == 0 & id != 186058 ~ 0, #to fix the 2 cases mentioned above
-        visit != 0 & (fup_y != 0 | id == 186058) ~ as.numeric(ran_date %--% visit_date, unit = "months"))
+            fup_y == 0 & id != x ~ 0, #to fix the 2 cases mentioned above
+        visit != 0 & (fup_y != 0 | id == x) ~ as.numeric(ran_date %--% visit_date, unit = "months"))
     ) %>%
 ungroup()
 
 #remove the other visits of these 3 ID's but keep visit 0
 data_long <- data_long %>%
-    filter(!(id %in% c(203006, 263006, 190005) & visit != 0))
+    filter(!(id %in% c(...) & visit != 0))
 
 #inspect again
 df_wrong_check <- data_long %>%
@@ -305,7 +305,7 @@ allrows <- data_long_valid_visits %>%
     #filter(is.na(transplant_flag_eot) & end_eot_reason_recode_full == "Kidney transplant")
 
 #make variable outcome, 2 for competing risk, 1 for death, 0 for censored
-#note that afterwards, we combined 0 and 2 in the weighted cox model. 
+#note that afterwards, we combined 0 and 2 in the weighted cox model. #we do not need seperate outcome for competing risk in the cox model 
 data_long_valid_visits <- data_long_valid_visits %>%
     group_by(id) %>%
     mutate(
