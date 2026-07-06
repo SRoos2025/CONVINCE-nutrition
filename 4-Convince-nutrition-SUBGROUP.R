@@ -39,6 +39,7 @@ walk(list.files(paste0(path, "R/funs")), ~ source(paste0(path, "R/funs/", .x)))
 #1.0 datacleaning----
 
 #we did not calculate baseline_crp yet
+#we also calculate baseline kt/V for a different project
 data_weight_allvisits_imp <- data_weight_allvisits_imp %>%
     group_by(.imp, id)%>%
     mutate(
@@ -69,9 +70,12 @@ unimputed <- unimputed %>%
         baseline_lti = if_else(visit == 0, lti, NA)
     )%>%
     ungroup()
-#for SCI and LTI, we take values below 40th percentile
+#for SCI and LTI, we take values below 40th percentile as a sensitivity analysis
 quantile(unimputed[["baseline_sci"]], probs = 0.40, na.rm = TRUE) # 18.9
 quantile(unimputed[["baseline_lti"]], probs = 0.40, na.rm = TRUE) #17.1
+
+# we also use 14.5 (LTI) and 19 (SCI) based on previous studies.
+#to do that this code can be re-run but with LTI below 14.5 and SCI below 19 respectively.e
 
 unimputed <- unimputed %>%
     group_by(id) %>%
@@ -683,7 +687,7 @@ figure_2
 ggsave("nutr_sub.png", figure_2,
        width = 20, height = 12, dpi = 600)
 
-#B weighted over all imputations----
+#B weighted over all imputations but not seperately per visit----
 #0.set-up----
 #load data
 load(paste0(path, "data_weight_allvisits.Rdata"))
@@ -1247,7 +1251,7 @@ ggsave("nutr_sub_sens.png", figure_sens,
        width = 20, height = 12, dpi = 600)
 
 
-#C unweighted----
+#C unweighted subgroup analyses----
 #0. set-up----
 load(paste0(path, "data_unweighted.Rdata"))
 #1.datacleaning----
