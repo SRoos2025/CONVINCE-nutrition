@@ -702,7 +702,7 @@ plot_data_wemix <- plot_data_wemix %>%
         ll = if_else(ll<0, 0, ll)
     )
 
-crp_plot <- plot_lmm_nutrition_weight(plot_data_wemix, y_lab = "CRP (mg/dL)", y_lim = c(0, 10))
+crp_plot <- plot_lmm_nutrition_weight(plot_data_wemix, y_lab = "CRP (mg/dL)", y_lim = c(0, 5))
 crp_plot
 
 ggsave("crp_plot_weight_sens.png", crp_plot,
@@ -893,7 +893,7 @@ fit_spline_bmi_cox_weight <- map(imp_list_weight, \(x)cox_spline_nutr(x, nutr_va
 #turn it from list to dataframe
 fit_spline_bmi_cox <- bind_rows(fit_spline_bmi_cox_weight)
 #apply rubin's rules
-fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 25)
+fit_spline_bmi_cox <- rubin_rule_cox_spline(fit_spline_bmi_cox, nutr_var = "bmi", center_at = 23.9)
 expr_bmi <- expression(BMI (kg/m^2))
 #plot it
 plots_spline_cox[[2]]<- nutr_flex_plot(fit_spline_bmi_cox, nutr_var = "bmi", x_lab = expr_bmi, center_val = 25, break_min = 10, break_max = 50, breaks = 10)
