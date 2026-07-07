@@ -97,7 +97,10 @@ We apply both linear cox function (cox_nutr). But we also check for potential no
 
  **4-CONVINCE-nutrtition weighted good**
  In which we use "data_weight_allvisits_imp.Rdata" created in 3-IPCW 
- -For the LMM, we want to use weights but lmer does not support this. 
+ -For the LMM, we want to use weights but lmer or lme4 only has precision weights not leveled weights: https://american-institutes-for-research.github.io/WeMix/articles/Weighted_Linear_Mixed_Effects_Models.html
+ -we note that svylme and svyglm are also options.
+ -we test all 3 to see if they give similar estimates. They do. However, svylme and svyglm do not seem to support time/visit as a categorical variable. So we choose WeMix. WeMix by default needs 2 weights, we only have one. So we set the other weight to 1 for everyone. Furthermore, the output is not tidy (no clear coefficient or standard deviation in the output). Therefore we have to do that ourselves with tidy output.
+ 
 
 
 **5.2-CONVINCE-baseline-derivation.qmd**
