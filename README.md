@@ -103,7 +103,6 @@ We apply both linear cox function (cox_nutr). But we also check for potential no
  -For the weighted cox model, we can still use the same model but we specify weights (cox can deal with a single weight) and robust standard deviations
  
 
-
 **5.2-CONVINCE-baseline-derivation.qmd**
 First step is baseline derivation
 -We use the unimputed dataset (so we filter .imp=0 from “imputed_data_convince.Rdata”). We filter visit 0 to retrieve baseline information.
