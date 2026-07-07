@@ -1,4 +1,4 @@
-<img width="470" height="50" alt="image" src="https://github.com/user-attachments/assets/6eb0f9f5-37ab-40ae-9c0d-4335d0cd3842" />Explanation/guide for the coding for post-hoc analysis of CONVINCE
+/>Explanation/guide for the coding for post-hoc analysis of CONVINCE
 By Sanne Roos 
 R files:
 -0-nutritionConvince-datacleaning-lab 
@@ -13,5 +13,5 @@ we perform the following adjustments:
 7.	We calculate a new variable called BUN (blood urea nitrogen) which we get from dividing urea in mgdL by 2.1428.
 8.	(#reference for conversion value of 2.14: "Clinical practice guidelines for nutrition in chronic renal failure. KDOQI, National Kidney Foundation. Am J Kidney Dis. 2000 Jun;35(6 Suppl 2):S17-S104. doi: 10.1053/ajkd.2000.v35.aajkd03517. Erratum in: Am J Kidney Dis 2001 Oct;38(4):917)
 9.	Finally, we save this to file called: convince_data_long_nutrition.rds
-<img width="470" height="363" alt="image" src="https://github.com/user-attachments/assets/0b785b96-dc0d-4faa-a9c6-dba6f81707a4" />
+
 
