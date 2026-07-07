@@ -78,7 +78,29 @@ We save what we have so far to "data_unweighted.Rdata"
 -we try to make a model across all visits, that predicts change of not being censored due to an informative reason. We estimate this based on clinical predictors. We calculate inverse probability ipcw. We see that after weighting, density curves show improved overlap. See also supplemental figure 1 of the publication. 
 As the frequency of informative censoring was low, we also fit a generalized linear model per imputation but over all visits, and we perform sensitiviy analyses with that. 
 
-5.2-CONVINCE-baseline-derivation.qmd
+**4-CONVINCE-nutrtition unweight**
+In which we use “data_unweighted.Rdata” created in 3-IPCW script.
+Part 1: linear mixed models to see if nutritional variables differ over time between HD and HDF 
+-We turn visit into a factor, to check if linear association is appropriate. Furthermore, each visit is about 3 months later for each patient +/- 1 or 2 weeks. Therefore, turn i tinto time in months, derived from the visit variable. 
+-we make a list of the imputations to loop over
+-we apply linear mixed models, using visit_time as a factor, with in the model the baseline nutritional variable, and we cluster for id. 
+-we perform this on each imputation and pool from package mice. (we also pooled manually, this resulted in same outcome so we continue in the rest of the script with automatic pooling (function pool) from the mice package). 
+-We plot the predicted values using ggpredict. 
+Part 2: mortality association of the nutritional variables
+#nutrition is not randomized, therefore we corrext in function cox_nutr for several confounding variables.
+We apply both linear cox function (cox_nutr). But we also check for potential non-linear relationships with function cox_spline_nutr. we use normalised splines in stead of penalised splines (penalised splines somehow did not work with weights, normalised and penalised are similar). We let it choose knots automatically with 3 degrees of freedom. 
+-note that we let the model center in the rubin_rule_cox_spline function, not in the cox function itself. As we want to center over the total pooled result and not per imputation (then each imputation could have a different center, we want one center for the plot). However, it is possible that that value does not exist exactly, which is why we use this bit of code:
+#with approx function, you return a list of points which linearly interpolate given data points
+    #x and y are the numeric vectorns giving the coordinaties of the points to be interpolated
+    #xout is an optional set of numeric values specifying where interpolation is to take place (see also https://www.r-bloggers.com/2023/08/mastering-data-approximation-with-rs-approx-function/)
+            center <- approx(x = data[[nutr_var]], y = data$b, xout = center_at)$y
+
+ **4-CONVINCE-nutrtition weighted good**
+ In which we use "data_weight_allvisits_imp.Rdata" created in 3-IPCW 
+ -For the LMM, we want to use weights but lmer does not support this. 
+
+
+**5.2-CONVINCE-baseline-derivation.qmd**
 First step is baseline derivation
 -We use the unimputed dataset (so we filter .imp=0 from “imputed_data_convince.Rdata”). We filter visit 0 to retrieve baseline information.
 -For baseline table, we selected some relevant aspects, and we will further refer to more complete baseline information in the original publication of the CONVINCE trial. For now, we selected
