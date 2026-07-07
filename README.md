@@ -15,7 +15,7 @@ we perform the following adjustments:
 8.	(#reference for conversion value of 2.14: Tantray, Javeed & Mansoor, Sheikh & Choh Wani, Rasy & Nissa, Nighat. (2023). Estimation of blood urea. 10.1016/B978-0-443-19174-9.00009-X. 
 9.	Finally, we save this to file called: convince_data_long_nutrition.rds
 
--1-nutritionConvince-dataprocessing
+**-1-nutritionConvince-dataprocessing**
 In which we use the following dataset:
  The one created in 0-nutritionConvince-datacleaning, which we saved under convince_data_long_nutrition.rds
 And we perform the following adjustments:
@@ -42,6 +42,31 @@ In the current database, status is death or alive at end of study. No competing 
 Status is 1 if death occurs, 0 if patient is censored/alive at study end without ntx/quitting dialysis, 2 if transplantation occurs/quittind dialysis as a competing risk (note that in the final analysis, we take 2 and 1 together, and do not seperately take competing risk as a seperate outcome).
 Currently, follow-up is until last monitored, patients were monitored until april 2023 (end of study). Note that this is different compared to our analysis as in CONVINCE, people were still followed after NTx to follow up for mortality (but we censor them).
 7.	We save this file to convince_nutrition_1.rds
+
+**-2-Convince-imputation**
+In which we use the following dataset:
+ The one created in 1-nutritionConvince-dataprocessing, which we saved under convince_nutrition_1.rds"
+Furthermore, for the prediction matrix we want the comorbidities to improve prediction for imputation. These are not filled in in this dataset (all NA). Therefore, we also load file CONVINCE_export_20230417.xlsx with comorbidity data.
+And we perform the following:
+-we select the rows of interest with comorbidity variables from CONVINCE_export_20230417, and left join these, matching by id.
+-we filter on valid visit dates. We do not want imputation over visits that did no occur
+Futhermore, only one patient has visit 16, we will restrict analyses to visit 15.
+-we select variables of potential interest to predict missing variables. Note that we do not select calculated variables created in 1-nutritionConvince-dataprocessing (such as nPCR, UFR, LTI, SCI, BUN). It is better to recalculate them after imputating the variables that they consist of (such as kt/v etc).
+-We fill dialysis vintage for each row, as this does not change over time and we don’t want that to get imputated. Furthermore, we set group to 1 (HDF) and 0 (HD), which is more easy to interpret for the imputation model).
+-We added name to the imputation model, which is the name of the center. This contains spaces, therefore we remove spaces from the variable name. 
+-We set hdf convective volume to 0 instead of NA for everyone on HD, otherwise the imputation model will estimate something for HD while it should all be 0. 
+-We set up the predictor Matrix. We see that there are 95 ranks (number of linearly independent columns), and 202 columns, meaning there are columns that are linearly dependent on another. Looking at the logged Events in mice object, we see that name is constant. However, with and without name gives same warnings. Leaving some variables out do not change the warnings. After we inspect the graphic plot later on after the imputation, the results look good. We ignore the warning.
+-We make vector nimp in which we define the variables that are predictive and that do not have to be imputated. We define dates. We define limp, the variables we want to impute (that go into the formula of nPCR, LTI, SCI, UFR). We set the variables that do not have to be imputated (including the dates) to 0 in the matrix. Cluster variable is set to -2, in our case we want the model to cluster for id.
+-We set the method for imputation for the variables of our interest to 2l.pmm, and for the dates we specify we do not use any method, so mice “knows” dates do not have to be imputed (otherwise it gives error because mice cannot impute dates).
+-We perform imputation with 10 datasets and 50 iterations.
+After running the model with and without name in it, we get the same warnings of failed convergence. Thus, we keep name. 
+NOTE: running the imputation results in several warnings regarding scaling, this does not effect the quality of imputation result, we ignore this.
+We also get the message that model fails to converge in some of the iterations. Plotting the result shows random plots for imputation, means we are satisfied with the result.
+-We save this imputation result to 
+“imputation_object.Rdata”
+-We turn it back into a dataframe and recalculate bmi, bun, npcr, sci, lti and ultrafiltration rate.
+-We save this to “imputed_data_convince.Rdata”
+
 
 
 
