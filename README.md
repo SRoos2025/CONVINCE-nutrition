@@ -67,6 +67,30 @@ We also get the message that model fails to converge in some of the iterations. 
 -We turn it back into a dataframe and recalculate bmi, bun, npcr, sci, lti and ultrafiltration rate.
 -We save this to “imputed_data_convince.Rdata”
 
+**3-Convince-IPCW**
+We load “imputed_data_convince.Rdata” which we created in 2-Convince-imputation
+We only want to use the imputed datasets so we filter out the imputation 0 (with NA’s/missings in it).
+We create a variable called inf_cens for informative censoring. The last row of each patient should be 1 if they stopped the study before the end for an informative reason. Stopping dialysis, kidney transplantation, clinical reasons, changed modality, patient decision or patient died are informative. (there are no more measurement points available and this is due to a reason that could have changed the nutritional value or UFR (other project) of interest). For example, patients with a worse nutritional status could die sooner and that could be the reason why they have no more npcr measurements. 
+Just for the formality, we also create variable non_inf_cens which is for non informative censoring such as participant moved or Completed treatment.
+We recalculate baseline values for our mixed model later on, and we recalculate time as a continuous variable (time was not in the imputation process so we recalculate it).
+Next, we want to inspect how many people have informative censoring at each point. It seems that at visit 15, no one has informative censoring. At each visit point, the amount of informative censoring is below 100. 
+We save what we have so far to "data_unweighted.Rdata"
+-we try to make a model across all visits, that predicts change of not being censored due to an informative reason. We estimate this based on clinical predictors. We calculate inverse probability ipcw. We see that after weighting, density curves show improved overlap. See also supplemental figure 1 of the publication. 
+As the frequency of informative censoring was low, we also fit a generalized linear model per imputation but over all visits, and we perform sensitiviy analyses with that. 
+
+5.2-CONVINCE-baseline-derivation.qmd
+First step is baseline derivation
+-We use the unimputed dataset (so we filter .imp=0 from “imputed_data_convince.Rdata”). We filter visit 0 to retrieve baseline information.
+-For baseline table, we selected some relevant aspects, and we will further refer to more complete baseline information in the original publication of the CONVINCE trial. For now, we selected
+#general information:     "country", "sex", "age",
+#vitals:    "sbp_pre", "dbp_pre", (blood pressure)
+#dialysis information:     "dial_vintage" (how long they have been on dialysis), "ktv_pre" (Kt/V as measure of dialysis adequacy), "blood_flow" (in the vascular access), "uf_vol" (ultrafiltration volume),
+#laboratory:    "creat_pre_umoll", "bun" (blood urea nitrogen), "crp_pre_mgdl", "hb_pre_mmoll", "urea_pre_mgdl", 
+#variables of interest in analaysis nutrition:    "npcr", "lti", "sci", "bmi"
+-we plot histograms of each variable to inspect the normality, and then specify the variables which are not normally distributed. These will be represented as median with IQR.
+You can use render function to get the table into a word document
+
+
 
 
 
