@@ -1,7 +1,8 @@
 />Explanation/guide for the coding for post-hoc analysis of CONVINCE
 By Sanne Roos 
 R files:
--0-nutritionConvince-datacleaning-lab 
+
+**-0-nutritionConvince-datacleaning-lab **
 
 we perform the following adjustments:
 1.	Make all variables lower case
