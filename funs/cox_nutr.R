@@ -4,7 +4,10 @@ cox_nutr <- function(.data, nutr_var, robust = TRUE, weights = TRUE) {
     rhs <-    paste0(nutr_var, 
               #Adjustment is necessary as nutrition is not a randomised intervention
              "+ age +sex +dial_vintage  +hb_pre_mmoll + crp_pre_mgdl  + SCR_MH_CAN_OCCUR + uf_vol + SCR_MH_COPD_OCCUR + SCR_MH_CVA_OCCUR + SCR_MH_DIAB_OCCUR + SCR_MH_MYO_OCCUR + SCR_MH_CHF_OCCUR")
-fit <- coxph(as.formula(paste0(lhs, rhs)), data = .data, 
+#For sensitivity analysis, leave out electrolytes
+    #+phos_pre_mmoll +pth_pre_pmoll+na_pre_mmoll+k_pre_mmoll +mg_pre_mmoll
+    
+    fit <- coxph(as.formula(paste0(lhs, rhs)), data = .data, 
              robust = robust, 
              weights = if(weights) { 
                  ipcw
